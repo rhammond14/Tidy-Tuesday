@@ -1,0 +1,53 @@
+---
+title: "Volcanoes"
+author: "Rachel Hammond"
+date: "5/11/2020"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(ggthemes)
+library(maps)
+library(RColorBrewer)
+library(viridis)
+```
+
+```{r}
+volcano <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv')
+eruptions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/eruptions.csv')
+
+```
+
+```{r}
+world <- map_data("world")
+
+ind_volcanoes <- volcano %>% 
+  filter(country == "Indonesia") %>% 
+  filter(last_eruption_year != "Unknown")
+
+indo_map <- world %>% 
+  filter(region == "Indonesia")
+
+ind_volcanoes <- mutate(ind_volcanoes, Last_Eruption = as.double(last_eruption_year))
+
+ind_volcanoes %>% 
+  filter(Last_Eruption > 2000) -> ind_volcanoes
+```
+
+```{r}
+ ggplot() +
+  geom_polygon(data = indo_map, aes(x = long, y = lat, group = group),
+               fill = "seagreen4", alpha = .4) +
+  coord_map(projection = "albers", lat0 = 0, lat1 = 114) +
+  geom_point(data = ind_volcanoes, aes(x = longitude, 
+                                      y = latitude, 
+                                      color = Last_Eruption),
+             size = 2.5, alpha = .8) +
+  scale_color_viridis(option = "A")+
+  theme_map() +
+  labs(title = "Indonesian Volcano Eruptions Since 2000",
+       color = "Date of Last Eruption") +
+  theme(legend.position = "right")
+```
