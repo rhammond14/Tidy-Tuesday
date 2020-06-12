@@ -1,0 +1,30 @@
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+
+firsts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-09/firsts.csv')
+science <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-09/science.csv')
+```
+
+```{r}
+firsts <- firsts %>% 
+  group_by(year, category, gender) %>%
+  count(year)
+
+firsts %>% 
+  filter(gender == "Female African American Firsts") %>% 
+  ggplot(mapping = aes(x = category, y = year, color = category)) +
+  geom_point(alpha = .6, size = 3) +
+  coord_flip() +
+  theme(legend.position = "none") +
+  labs(
+       x = "",
+       y = "",
+       title = "Achievements by African American Women",
+       subtitle = "Firsts in each category by year",
+       caption = "Data from Wikipedia\n @RachHammond14") +
+  scale_color_tableau()
+
+ggsave("AAFemaleFirsts.png", plot = last_plot(), height = 6, width = 10)
+```
