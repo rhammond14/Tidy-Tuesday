@@ -1,0 +1,41 @@
+```{r}
+# Load libraries
+library(tidyverse)
+library(ggthemes)
+library(gganimate)
+library(transformr)
+library(RColorBrewer)
+```
+# Get the Data
+```{r}
+individuals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-23/individuals.csv')
+locations <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-23/locations.csv')
+```
+
+```{r}
+locations %>% 
+  group_by(animal_id) %>% 
+  summarize(n= n_distinct(event_id)) %>% 
+  arrange(n)
+```
+
+```{r}
+plot <- locations %>%
+  filter(animal_id == c("QU_car143", "NA_car133", "NA_car132", "MO_car150", "SC_car171")) %>% 
+  ggplot(mapping = aes(x=longitude, y = latitude, group = animal_id, color = animal_id)) +
+  geom_path() +
+  geom_point() +
+  theme_minimal() +
+  scale_color_brewer(palette = "Oranges") +
+  labs(title = " Five caribou with the most movement",
+       caption = "Data from Movebank and BC Ministry of Environment") +
+    theme(legend.position = "none",
+          plot.background = element_rect(fill = "darkseagreen4"),
+          text = element_text(color = "white"))
+```
+
+```{r}
+plot +
+  transition_time(timestamp) +
+  shadow_mark(alpha = .3, size = .5)
+```
