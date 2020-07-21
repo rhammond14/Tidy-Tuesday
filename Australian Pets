@@ -1,0 +1,47 @@
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2020-07-21')
+tuesdata <- tidytuesdayR::tt_load(2020, week = 30)
+
+animal_outcomes <- tuesdata$animal_outcomes
+animal_complaints <- tuesdata$animal_complaints
+
+library(tidyverse)
+library(ggthemes)
+library(stringr)
+library(RColorBrewer)
+
+animal_complaints %>% 
+  filter(`Animal Type` == "dog") %>% 
+  mutate(year = as.integer(str_sub(`Date Received`, -4, -1))) %>% 
+  group_by(year, `Complaint Type`) %>% 
+  summarize(n = n()) %>% 
+  ungroup() %>% 
+  ggplot(mapping = aes(x = year, y = n, fill = `Complaint Type`)) +
+  geom_col() +
+  labs(y = "",
+       x = "",
+       title = "What are the most common complaints on dogs in Townsville?",
+       subtitle = "Most complaints are private impound and noise",
+       captions = "Data from Townsville Animal Compaints") +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(n.breaks = 8) +
+  theme_classic() +
+  scale_fill_brewer() +
+  theme(legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8, face = "bold"),
+        plot.title = element_text(face = "bold")) +
+  annotate("curve", 
+           xend = 2016,
+           yend = 6100,
+           x = 2020,
+           y = 5000,
+           arrow = arrow(type = "closed", length = unit(.1, "inch")), 
+           color = "royalblue4",
+           curvature = -.4) +
+  annotate("text",
+           x = 2020,
+           y = 5700,
+           label = "2016 had \nthe most \ncomplaints",
+           size = 3,
+           color = "royalblue4")
+```  
