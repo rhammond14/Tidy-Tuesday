@@ -1,0 +1,25 @@
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
+library(palmerpenguins)
+library(magick)
+
+tuesdata <- tidytuesdayR::tt_load('2020-07-28')
+penguins <- tuesdata$penguins
+
+penguins %>% 
+  filter(!is.na(sex)) %>% 
+  ggplot(mapping = aes(x = species, y = flipper_length_mm, fill = species)) +
+  geom_violin() +
+  coord_flip() +
+  labs(title = "Gentoo penguins tend to have the longest flippers",
+       x = "",
+       y = "Flipper length (mm)",
+       caption = "Data from Dr. Kristen Gorman and palmerpenguins \nImage from @allison_horst") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("#ff6602", "#c95dca", "#0f6f74")) +
+  annotation_custom(rasterGrob(penguins_art), 
+                    ymin = 215, ymax = 230, 
+                    xmin = "Gentoo", xmax = "Adelie") +
+  theme(plot.title = element_text(face = "bold"))
