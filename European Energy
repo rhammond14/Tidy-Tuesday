@@ -1,0 +1,34 @@
+```{r}
+library(tidyverse)
+
+tuesdata <- tidytuesdayR::tt_load(2020, week = 32)
+
+energy_types <- tuesdata$energy_types
+
+energy_types %>% 
+  filter(level == "Level 1") %>% 
+  filter(country_name %in% c("Germany", "Italy", "Spain", "France", "Turkey", "Greece", "Belgium", "Netherlands", "Czechia", "Romania")) %>% 
+  filter(type == "Solar") %>% 
+  rename(year2018 = "2018") %>%   
+  mutate(country_name = fct_reorder(country_name,desc(year2018))) %>% 
+  ggplot(mapping = aes(x = country_name,y = year2018)) +
+    geom_col(fill = "lightgoldenrod1") +
+  coord_flip() +
+  labs(title = "Germany outshines all",
+       subtitle = "10 largest solar power producers in Europe, 2018",
+       caption = "Data from Eurostat",
+       y = "GWh",
+       x = "") +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", color = "lightgoldenrod1"),
+        plot.background = element_rect(fill = "steelblue2"),
+        plot.subtitle = element_text(size = 10, color = "white"),
+        axis.text = element_text(color = "white"),
+        plot.caption = element_text(color = "white"),
+        axis.title.x = element_text(color = "white"),
+        panel.grid = element_blank(),
+        axis.line = element_line(color = "white"))
+
+ggsave("Energy.png", plot = last_plot())
+```
