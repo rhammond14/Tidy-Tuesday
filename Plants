@@ -1,0 +1,40 @@
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+tuesdata <- tidytuesdayR::tt_load(2020, week = 34)
+threats <- tuesdata$threats
+
+threats %>% 
+  filter(!is.na(year_last_seen)) %>% 
+  mutate(year = factor(year_last_seen)) %>% 
+  filter(!is.na(year)) %>% 
+  group_by(year,threat_type) %>% 
+  summarize(count = sum(threatened)) %>% 
+  mutate(prop = count/sum(count)) %>%   
+  mutate(threat_type = fct_reorder(threat_type,count)) %>% 
+  ggplot(mapping = aes(x = as.numeric(year), y = prop, fill = threat_type)) +
+  geom_area() +
+  theme_minimal() +
+  labs(title = "Plant Threats Over Time",
+       subtitle = "Agriculture & Aquaculture have posed the most serious threats",
+       caption = "Data from IUCN Red List",
+       fill = "Threat Type",
+       x = "",
+       y = "") +
+  scale_x_continuous(breaks = 1:7,
+                     labels = str_wrap(c("Before 1900", "1900", "1920", "1940", "1960",
+                                         "1980", "After 2000"))) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = 
+                      c("#F21A00","#EB5000","#E58600","#E1B103","#E5BC13","#E9C622",
+                        "#D6C846","#ACC07E", "#82B8B6", "#67AFBF","#51A4B8","#3B9AB2")) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+        plot.background = element_rect("cornsilk"),
+        axis.ticks = element_line())
+
+ggsave("Plants.png", plot = last_plot())
+```
