@@ -1,0 +1,53 @@
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+tuesdata <- tidytuesdayR::tt_load(2020, week = 35)
+chopped <- tuesdata$chopped
+
+chopped %>% 
+  filter(!is.na(episode_rating)) %>% 
+  filter(season <= 40 ) %>%
+  group_by(season) %>% 
+  mutate(season_avg = mean(episode_rating),
+         even = season %% 2 == 1) %>% 
+  ggplot() +
+  geom_line(mapping = aes(x = series_episode, y = season_avg)) +
+  geom_point(mapping = aes(x = series_episode, y = episode_rating, 
+                           color = even), size = .5) +
+  geom_segment(mapping = aes(x = series_episode, xend = series_episode,
+                             y = episode_rating, yend = season_avg,
+                             color = even),
+               linetype = "dotted") +
+  theme_minimal() +
+  labs(title = "Chopped Ratings by Sesaon",
+       subtitle = "Eight episodes received the highest rating of 9.2",
+       caption = "Data from Kaggle and IMDB",
+       y = "Rating",
+       x = "Series Episode") +
+  annotate("curve", 
+           xend = 360,
+           yend = 5.5,
+           x = 300,
+           y = 6,
+           arrow = arrow(type = "closed", length = unit(.1, "inch")), 
+           color = "orangered2",
+           curvature = .4) +
+  annotate("text",
+           x = 225,
+           y = 6,
+           label = "Sesason 29, Episode13 \n'Worst Cooks Challenge' \nhad the lowest rating",
+           size = 3,
+           color = "orangered2") +
+  scale_color_manual(values = c("orangered2", "orange1")) +
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect("azure2"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line("grey78"),
+        axis.line.x = element_line("grey78"),
+        axis.text = element_text(color = "grey50"),
+        axis.title = element_text(color = "grey50"))
+
+ggsave("Chopped.png", plot = last_plot())
+```
