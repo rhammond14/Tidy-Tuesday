@@ -1,0 +1,47 @@
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
+library(geojsonio)
+library(mapproj)
+library(rgeos)
+
+tuesdata <- tidytuesdayR::tt_load('2020-09-15')
+kids <- tuesdata$kids
+
+spdf <- geojson_read("us_states_hexgrid.geojson",  what = "sp")
+
+spdf@data = spdf@data %>%
+  mutate(google_name = gsub(" \\(United States\\)", "", google_name))
+  
+spdf_fortified <- broom::tidy(spdf, region = "google_name")
+
+kids <- kids %>%
+  filter(variable == "fedEITC") %>% 
+  filter(year == 2016)
+  
+full_data <- spdf_fortified %>%
+  left_join(. , kids, by=c("id"="state"))
+  
+centers <- cbind.data.frame(data.frame(gCentroid(spdf, byid=TRUE), id=spdf@data$iso3166_2))
+
+full_data %>% 
+  ggplot() +
+   geom_polygon(aes(fill = inf_adj_perchild, x = long, y = lat, group = group), 
+               color = "white") +
+   geom_text(data=centers, aes(x=x, y=y, label=id), color = "grey40", size = 3) +
+   scale_fill_gradient(low = "lightyellow2", high = "steelblue2")+
+   theme_void() +
+   coord_map() +
+   labs(title = "Federal EITC Spending Per Child (2016)",
+       subtitle = "Mississippi receives the most at $1,418 per child",
+       fill = "Dollars Spent \nPer Child ($000s)",
+       caption = "Data from Urban Institute") +
+   theme(plot.background = element_rect(fill = "gray88"),
+        plot.title = element_text(face = "bold", color = "grey50"),
+        plot.subtitle = element_text(color = "grey50"),
+        plot.caption = element_text(color = "grey50"),
+        legend.title = element_text(color = "grey50", face = "bold", size = 8),
+        legend.text = element_text(color = "grey50", size = 8))
+
+ggsave("EITC.png", plot = last_plot())
+```
