@@ -20,6 +20,7 @@ ten %>%
     medal == "Bronze" ~ "abronze")) %>% 
   group_by(city, medal) %>% 
   summarize(n = n()) %>% 
+  within({cityn = ave(n, city, FUN = sum)}) %>% 
   ggplot() +
   geom_bar(aes(x = fct_reorder(city, n), 
                y = n, fill = medal), color = "white", stat = "identity") +
