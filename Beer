@@ -1,0 +1,47 @@
+library(tidyverse)
+library(extrafont)
+
+tuesdata <- tidytuesdayR::tt_load(2020, week = 43)
+beer_awards <- tuesdata$beer_awards
+
+top_ten <- factor(c("Denver", "Portland", "Milwaukee", "San Diego", "Seattle", "Chicago", 
+                    "Fort Collins", "San Antonio", "Golden", "Salt Lake City"), 
+                  levels = c("Denver", "Portland", "Milwaukee", "San Diego", "Seattle",
+                             "Chicago", "Fort Collins", "San Antonio", "Golden", 
+                             "Salt Lake City"))
+
+ten <- beer_awards %>% 
+  filter(city %in% top_ten)
+  
+ten %>%
+  mutate(medal = case_when(
+    medal == "Gold" ~ "cgold",
+    medal == "Silver" ~ "bsilver",
+    medal == "Bronze" ~ "abronze")) %>% 
+  group_by(city, medal) %>% 
+  summarize(n = n()) %>% 
+  ggplot() +
+  geom_bar(aes(x = fct_reorder(city, n), 
+               y = n, fill = medal), color = "white", stat = "identity") +
+  labs(x = "",
+       y = "",
+       fill = "Medal",
+       title = "Cities With Award Winning Beers",
+       subtitle = "US cities to win the most medals at the Great American Beer Festival since 1987") +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_manual(labels = c("Bronze", "Silver", "Gold"),
+                    values = c("peru", "grey65", "gold")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect("snow3"),
+        plot.title = element_text(color = "white", family = "Cambria", face = "bold"),
+        plot.subtitle = element_text(color = "white", family = "Cambria"),
+        axis.text = element_text(color = "white", family = "Cambria", face = "bold"),
+        axis.text.x = element_blank(),
+        legend.title = element_text(color = "white", family = "Cambria"),
+        legend.text = element_text(color = "white", family = "Cambria")) +
+  scale_y_continuous(expand = c(0,0)) +
+  geom_text(aes(x = city, y = n, fill = medal, label = n), 
+            position = position_stack(vjust = .5),
+            color = "white", size = 3, family = "Cambria")
